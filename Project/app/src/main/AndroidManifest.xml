@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.javaappproject">
 
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyB2jJivwVb2jdtinUvmlaMG3faGANb7Ifw" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
