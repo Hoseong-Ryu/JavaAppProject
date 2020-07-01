@@ -1,5 +1,6 @@
 package com.example.javaappproject;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 
@@ -22,9 +23,6 @@ public class MarkerItem {
     private Date date;
     private String title;
     private String content;
-
-    private int width = 120;
-    private int height = 180;
 
 
     public MarkerItem(File file) {
@@ -51,18 +49,12 @@ public class MarkerItem {
         }
     }
 
-    public MarkerItem(File file, int width, int height) {
-        this(file);
-        setImageScale(width, height);
-    }
-
-    public void setImageScale(int width, int height) {
-        this.width = width;
-        this.height = height;
-    }
-
     public BitmapDescriptor getImageBitmapDescritor() {
-        return BitmapDescriptorFactory.fromBitmap(createScaledBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()), width, height, false));
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 32;
+        Bitmap src = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+
+        return BitmapDescriptorFactory.fromBitmap(src);
     }
 
     public double getLatitude() {
