@@ -1,15 +1,15 @@
 package com.example.javaappproject;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ImageDecoder;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -19,35 +19,36 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
-import static android.graphics.Bitmap.createScaledBitmap;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
 
     final String TAG = getClass().getSimpleName();
-    ImageView imageView;
     Button btnCamera;
     final static int TAKE_PICTURE = 1;
 
     String CurrentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
+
+    ArrayList<MarkerItem> markerItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         //region 레이아웃 연결
-        imageView = findViewById(R.id.imageView);
         btnCamera = findViewById(R.id.btnCamera);
         //endregion
 
@@ -118,15 +118,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         case REQUEST_TAKE_PHOTO: {
                             if (resultCode == RESULT_OK) {
                                 File file = new File(CurrentPhotoPath);
-                                /*
-                                Bitmap bitmap = MediaStore.Images.Media
-                                        .getBitmap(getContentResolver(), Uri.fromFile(file));
-                                if (bitmap != null) {
-                                    imageView.setImageBitmap(bitmap);
-                                }
-                                 */
+
                                 addMarker(file);
-                                imageView.setImageURI(Uri.fromFile(file));
                             }
                             break;
                         }
@@ -141,19 +134,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void addMarker(File file) {
-        ExifInterface exif = null;
-        try {
-            exif = new ExifInterface(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        final MarkerItem item = new MarkerItem(file);
+        markerItems.add(item);
 
+        //region    위치 강제 설정 기능 (완성후 activity_setlocation.xml과 같이 삭제)
+        final View dialogView = View.inflate(MainActivity.this, R.layout.activity_set_location, null);
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("위치 설정")
+                .setView(dialogView)
+                .setCancelable(false)
+                .setPositiveButton("완료", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        item.setLocation(Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLatitude)).getText().toString()), Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLongitude)).getText().toString()));
 
-        float[] p = new float[2];
-        BitmapDescriptor image = BitmapDescriptorFactory.fromBitmap(createScaledBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()), 200, 200, false));
-        exif.getLatLong(p);
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(item.getLatitude(), item.getLongitude())).icon(item.getImageBitmapDescritor()).title("new Marker"));
+                    }
+                })
+                .setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(item.getLatitude(), item.getLongitude())).icon(item.getImageBitmapDescritor()).title("new Marker"));
+                    }
+                })
+                .show();
+        //endrigon
 
-        mMap.addMarker(new MarkerOptions().position(new LatLng(p[0], p[1])).icon(image).title("new Marker"));
+        //mMap.addMarker(new MarkerOptions().position(new LatLng(item.getLatitude(), item.getLongitude())).icon(item.getImageBitmapDescritor()).title("new Marker"));
     }
 
     private void dispatchTakePictureIntent() {
