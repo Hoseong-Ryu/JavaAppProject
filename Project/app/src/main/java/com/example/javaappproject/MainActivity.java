@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
-        //ImgLoad();
+        ImgLoad();
     }
 
     private void ImgLoad() {
