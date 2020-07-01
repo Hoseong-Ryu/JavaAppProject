@@ -6,6 +6,7 @@ import android.media.ExifInterface;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,15 +23,15 @@ public class MarkerItem {
     private double longitude;   // 경도
     private Date date;
     private String title;
-    private String content;
+    private String content="";
 
 
     public MarkerItem(File file) {
         this.file = file;
 
-        ExifInterface exif = null;
+        // 위도 경도 설정
         try {
-            exif = new ExifInterface(file.getAbsolutePath());
+            ExifInterface exif = new ExifInterface(file.getAbsolutePath());
             float[] p = new float[2];
             exif.getLatLong(p);
 
@@ -41,12 +42,19 @@ public class MarkerItem {
             e.printStackTrace();
         }
 
+        // 시간, 제목(default: 시간) 설정
         try {
 
-            date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(file.getName().substring(5, file.getName().length()-4));
+            this.date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(file.getName().substring(5, file.getName().length()-4));
+
+            this.title = getDateSting();
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public BitmapDescriptor getImageBitmapDescritor() {
@@ -56,6 +64,8 @@ public class MarkerItem {
 
         return BitmapDescriptorFactory.fromBitmap(src);
     }
+
+    public LatLng getLatLng() { return new LatLng(latitude, longitude); }
 
     public double getLatitude() {
         return latitude;
@@ -76,5 +86,21 @@ public class MarkerItem {
 
     public String getDateSting() {
         return new SimpleDateFormat("yyyy년 MM월 dd일 HH시 mm분 ss초").format(date);
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

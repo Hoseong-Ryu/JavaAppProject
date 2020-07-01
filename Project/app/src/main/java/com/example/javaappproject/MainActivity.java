@@ -9,6 +9,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ParseException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,12 +19,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
@@ -153,21 +157,105 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setPositiveButton("완료", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        item.setLocation(Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLatitude)).getText().toString()), Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLongitude)).getText().toString()));
+                        try {
+                            item.setLocation(Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLatitude)).getText().toString()), Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLongitude)).getText().toString()));
+                        } catch (ParseException e) {  }
 
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(item.getLatitude(), item.getLongitude())).icon(item.getImageBitmapDescritor()).title(item.getDateSting()));
+
+                        addMarkerMethod(item);
                     }
                 })
                 .setNegativeButton("취소", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(item.getLatitude(), item.getLongitude())).icon(item.getImageBitmapDescritor()).title("new Marker"));
+                        addMarkerMethod(item);
                     }
                 })
                 .show();
         //endregion
 
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(item.getLatitude(), item.getLongitude())).icon(item.getImageBitmapDescritor()).title("new Marker"));
+        //addMarkerMethod(item);
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                // 변수 선언
+                View detailView = View.inflate(MainActivity.this, R.layout.activity_picture_detail, null);
+                ImageView picture;
+                final TextView title, date, location, content;
+                int i;
+
+
+                // 레이아웃 연결
+                picture = detailView.findViewById(R.id.imageViewPicture);
+                title = detailView.findViewById(R.id.textViewTitle);
+                date = detailView.findViewById(R.id.textViewDate);
+                location = detailView.findViewById(R.id.textViewLocation);
+                content = detailView.findViewById(R.id.textViewContent);
+
+                // 선택한 marker의 MarkerItem 찾기
+                for (i = 0; i<markerItems.size(); i++) {
+                    if(marker.getPosition().equals(markerItems.get(i).getLatLng())) {
+                        break;
+                    }
+                }
+                if(i<markerItems.size()) {
+                    final MarkerItem item = markerItems.get(i);
+                }
+                else {
+                    Log.e(TAG, "marker를 찾지 못함");
+                    return true;
+                }
+
+
+                // 레이아웃 세팅
+                picture.setImageURI(Uri.fromFile(item.getFile()));
+                title.setText(item.getTitle());
+                date.setText(item.getDateSting());
+                location.setText(item.getLatitude()+", "+item.getLongitude());
+                if(item.getContent().equals("")) {
+                    content.setText("내용을 입력해 주세요");
+                } else {
+                    content.setText(item.getContent());
+                }
+
+                final EditText editText = new EditText(MainActivity.this);
+                title.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("제목 수정")
+                                .setMessage("현재 제목 : " + title.getText())
+                                .setView(editText)
+                                .setPositiveButton("완료", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        item.setTitle(editText.getText().toString());
+                                        title.setText(item.getTitle());
+                                    }
+                                })
+                                .setNegativeButton("취소", null)
+                                .show();
+
+                        return true;
+                    }
+                });
+
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("상세 정보")
+                        .setView(detailView)
+                        .show();
+                return true;
+            }
+        });
+    }
+
+    // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
+    private void addMarkerMethod(MarkerItem item) {
+        mMap.addMarker(new MarkerOptions()
+                .position(item.getLatLng())
+                .icon(item.getImageBitmapDescritor())
+                .title(item.getDateSting())
+        );
     }
 
     private void dispatchTakePictureIntent() {
