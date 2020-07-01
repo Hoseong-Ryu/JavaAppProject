@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -79,8 +80,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
+        ImgLoad();
+    }
 
+    private void ImgLoad() {
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.example.javaappproject/files/Pictures";
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        for (int i=0; i< files.length; i++) {
+            addMarker(files[i]);
+        }
+        Log.d("filesNameList", "ImgPath: "+path);
 
+        //File file = new File(CurrentPhotoPath);
     }
 
     /**
@@ -114,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         case REQUEST_TAKE_PHOTO: {
                             if (resultCode == RESULT_OK) {
                                 File file = new File(CurrentPhotoPath);
-
                                 addMarker(file);
                             }
                             break;
@@ -154,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 })
                 .show();
-        //endrigon
+        //endregion
 
         //mMap.addMarker(new MarkerOptions().position(new LatLng(item.getLatitude(), item.getLongitude())).icon(item.getImageBitmapDescritor()).title("new Marker"));
     }
@@ -180,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
-
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -191,10 +201,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ".jpg",         /* suffix */
                 storageDir      /* directory */
         );
-
         // Save a file: path for use with ACTION_VIEW intents
         CurrentPhotoPath = image.getAbsolutePath();
-
         return image;
     }
 }
