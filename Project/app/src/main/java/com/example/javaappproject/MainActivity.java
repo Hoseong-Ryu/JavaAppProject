@@ -9,7 +9,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ParseException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -86,34 +85,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
-
-        //ImgLoad();
-    }
-
-    private void ImgLoad() {
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/com.example.javaappproject";
-        String checkPath = path+"/files";
-        String addImg = checkPath+"/Pictures";
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-        for (int i=0; i< files.length; i++) {
-            if (checkPath.equals(String.valueOf(files[i]))) {
-                File newDirectory = new File(addImg);
-                File[] newFiles = newDirectory.listFiles();
-                for (int j=0; j<newFiles.length; j++) {
-                    addMarker(newFiles[i]);
-                    Log.d("filesNameList", "yes " + newFiles[i]);
-                }
-            }
-            else{
-                Log.d("filesNameList", "no ");
-            }
-
-            //addMarker(files[i]);
-        }
-        //Log.d("filesNameList", "ImgPath: "+path);
-
-        //File file = new File(CurrentPhotoPath);
     }
 
     /**
@@ -220,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //endregion
 
         //addMarkerMethod(item);
-<<<<<<< HEAD
     }
 
     // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
@@ -239,10 +209,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             item.getFile().delete();
         }
 
-=======
 
         //region 마커 클릭
->>>>>>> f39e6a5ef58e892c533be9bad74df14928cb3a15
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
