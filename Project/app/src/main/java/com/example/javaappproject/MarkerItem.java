@@ -3,6 +3,7 @@ package com.example.javaappproject;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -18,6 +19,7 @@ import static android.graphics.Bitmap.createScaledBitmap;
 
 public class MarkerItem {
     private File file;
+    private ExifInterface exif;
 
     private double latitude;    // 위도
     private double longitude;   // 경도
@@ -31,7 +33,7 @@ public class MarkerItem {
 
         // 위도 경도 설정
         try {
-            ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+            exif = new ExifInterface(file.getAbsolutePath());
             float[] p = new float[2];
             exif.getLatLong(p);
 
@@ -75,7 +77,61 @@ public class MarkerItem {
         return longitude;
     }
 
+    private String ConvertTagGPSFormat(double coordinate) {
+
+        if (coordinate < -180.0 || coordinate > 180.0 || Double.isNaN(coordinate)) {
+            throw new IllegalArgumentException("coordinate=" + coordinate);
+        }
+
+        if (coordinate < 0)
+            coordinate *=-1;
+
+        StringBuilder sb = new StringBuilder();
+
+
+        if (coordinate < 0) {
+            sb.append('-');
+            coordinate = -coordinate;
+        }
+
+        int degrees = (int) Math.floor(coordinate);
+        sb.append(degrees);
+        sb.append("/1,");
+        coordinate -= degrees;
+        coordinate *= 60.0;
+        int minutes = (int) Math.floor(coordinate);
+        sb.append(minutes);
+        sb.append("/1,");
+        coordinate -= minutes;
+        coordinate *= 60.0;
+        sb.append(coordinate);
+        sb.append("/1000");
+
+
+        return sb.toString();
+    }
+
+
     public void setLocation(double latitude, double longitude) {
+        // 위도 설정
+        exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, ConvertTagGPSFormat(latitude));
+        if(latitude>=0)
+            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
+        else
+            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "S");
+        // 경도 설정
+        exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, ConvertTagGPSFormat(longitude));
+        if(longitude>=0)
+            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "E");
+        else
+            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "W");
+        // 저장
+        try {
+            exif.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         this.latitude = latitude;
         this.longitude = longitude;
     }
