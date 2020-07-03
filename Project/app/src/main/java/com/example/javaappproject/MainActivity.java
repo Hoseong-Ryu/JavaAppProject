@@ -88,13 +88,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void ImgLoad() {
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.example.javaappproject/files/Pictures";
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/com.example.javaappproject";
+        String checkPath = path+"/files";
+        String addImg = checkPath+"/Pictures";
         File directory = new File(path);
         File[] files = directory.listFiles();
         for (int i=0; i< files.length; i++) {
-            addMarker(files[i]);
+            if (checkPath.equals(String.valueOf(files[i]))) {
+                File newDirectory = new File(addImg);
+                File[] newFiles = newDirectory.listFiles();
+                for (int j=0; j<newFiles.length; j++) {
+                    addMarker(newFiles[i]);
+                    Log.d("filesNameList", "yes " + newFiles[i]);
+                }
+            }
+            else{
+                Log.d("filesNameList", "no ");
+            }
+
+            //addMarker(files[i]);
         }
-        Log.d("filesNameList", "ImgPath: "+path);
+        //Log.d("filesNameList", "ImgPath: "+path);
 
         //File file = new File(CurrentPhotoPath);
     }
@@ -175,6 +189,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //endregion
 
         //addMarkerMethod(item);
+
+        //region 마커 클릭
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
@@ -183,7 +199,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ImageView picture;
                 final TextView title, date, location, content;
                 int i;
-
 
                 // 레이아웃 연결
                 picture = detailView.findViewById(R.id.imageViewPicture);
@@ -247,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             }
         });
+        //endregion
     }
 
     // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
