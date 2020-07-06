@@ -86,6 +86,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
+<<<<<<< HEAD
+=======
+        //ImgLoad();
+    }
+
+    private void ImgLoad() {
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/com.example.javaappproject";
+        String checkPath = path+"/files";
+        String addImg = checkPath+"/Pictures";
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        for (int i=0; i< files.length; i++) {
+            if (checkPath.equals(String.valueOf(files[i]))) {
+                File newDirectory = new File(addImg);
+                File[] newFiles = newDirectory.listFiles();
+                for (int j=0; j<newFiles.length; j++) {
+                    addMarker(newFiles[i]);
+                    Log.d("filesNameList", "yes " + newFiles[i]);
+                }
+            }
+            else{
+                Log.d("filesNameList", "no ");
+            }
+
+            //addMarker(files[i]);
+        }
+        //Log.d("filesNameList", "ImgPath: "+path);
+
+        //File file = new File(CurrentPhotoPath);
+>>>>>>> master
     }
 
     /**
@@ -192,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //endregion
 
         //addMarkerMethod(item);
+<<<<<<< HEAD
     }
 
     // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
@@ -210,6 +241,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             item.getFile().delete();
         }
 
+=======
+>>>>>>> master
 
         //region 마커 클릭
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -315,6 +348,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         //endregion
+<<<<<<< HEAD
+=======
+    }
+
+    // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
+    private void addMarkerMethod(MarkerItem item) {
+        mMap.addMarker(new MarkerOptions()
+                .position(item.getLatLng())
+                .icon(item.getImageBitmapDescritor())
+                .title(item.getDateSting())
+        );
+>>>>>>> master
     }
 
     private void dispatchTakePictureIntent() {
