@@ -3,6 +3,7 @@ package com.example.javaappproject;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -18,6 +19,7 @@ public class MarkerItem {
     private File file;
     private ExifInterface exif;
 
+    //private int degree;
     private double latitude;    // 위도
     private double longitude;   // 경도
     private Date date;
@@ -41,15 +43,17 @@ public class MarkerItem {
             e.printStackTrace();
         }
 
-        // 시간, 제목(default: 시간) 설정
+        // 제목 (default: 파일 이름)
+        this.title = this.file.getName().substring(0, file.getName().length()-4);
+
+        // 시간 설정
         try {
-
-            this.date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(file.getName().substring(5, file.getName().length()-4));
-
-            this.title = getDateSting();
+            this.date = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss").parse(exif.getAttribute(ExifInterface.TAG_DATETIME));
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        //degree = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
     }
 
     public File getFile() {
@@ -147,6 +151,7 @@ public class MarkerItem {
 
     public void setTitle(String title) {
         this.title = title;
+        file.renameTo(new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('/')+1) + title+".jpg"));
     }
 
     public String getContent() {

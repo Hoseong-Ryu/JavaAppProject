@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -237,8 +238,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.e(TAG, "marker를 찾지 못함");
                     return false;
                 }
-
                 final MarkerItem item = markerItems.get(i);
+
+                final EditText editText = new EditText(MainActivity.this);
 
                 // 레이아웃 세팅
                 picture.setImageURI(Uri.fromFile(item.getFile()));
@@ -251,10 +253,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     content.setText(item.getContent());
                 }
 
-                final EditText editText = new EditText(MainActivity.this);
+                //제목 수정
                 title.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
+                        if(editText.getParent() != null)
+                            ((ViewGroup)editText.getParent()).removeView(editText);
+
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("제목 수정")
                                 .setMessage("현재 제목 : " + title.getText())
@@ -262,8 +267,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .setPositiveButton("완료", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        item.setTitle(editText.getText().toString());
-                                        title.setText(item.getTitle());
+                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                            item.setTitle(editText.getText().toString());
+                                            title.setText(item.getTitle());
+                                        }
+                                    }
+                                })
+                                .setNegativeButton("취소", null)
+                                .show();
+
+                        return true;
+                    }
+                });
+
+                // 메뉴 수정
+                content.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if(editText.getParent() != null)
+                            ((ViewGroup)editText.getParent()).removeView(editText);
+
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("내용 수정")
+                                .setMessage("현재 내용 : " + content.getText())
+                                .setView(editText)
+                                .setPositiveButton("완료", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                            item.setContent(editText.getText().toString());
+                                            content.setText(item.getContent());
+                                        }
                                     }
                                 })
                                 .setNegativeButton("취소", null)
