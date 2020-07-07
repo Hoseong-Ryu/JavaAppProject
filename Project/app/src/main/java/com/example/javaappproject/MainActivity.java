@@ -15,11 +15,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     final String TAG = getClass().getSimpleName()+"Log";    // D/MainActivityLog
     Button btnCamera;
+    Button btnmenu;
     final static int TAKE_PICTURE = 1;
 
     String CurrentPhotoPath;
@@ -59,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //region 레이아웃 연결
         btnCamera = findViewById(R.id.btnCamera);
+        btnmenu = findViewById(R.id.btnMenu);
         //endregion
 
         //region 구글맵 로드
@@ -75,6 +81,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 dispatchTakePictureIntent();
             }
         });
+        btnmenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup= new PopupMenu(getApplicationContext(), v);
+                Menu menu = popup.getMenu();
+                String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/com.example.javaappproject";
+                String checkPath = path+"/files";
+                String addImg = checkPath+"/Pictures";
+                File directory = new File(path);
+                File[] files = directory.listFiles();
+
+                for (int i=0; i< files.length; i++) {
+                    if (checkPath.equals(String.valueOf(files[i]))) {
+                        File newDirectory = new File(addImg);
+                        File[] newFiles = newDirectory.listFiles();
+                        for (int j=0; j<newFiles.length; j++) {
+                            menu.add(0,j,0,newFiles[j].getName());
+                            Log.d("filesNameLis", "yes " + i);
+                        }
+                    }
+                    else{
+                        Log.d("filesNameList", "no ");
+                    }
+                }
+
+                popup.show();//Popup Menu 보이기
+            }
+        });
         //endreion
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -85,6 +119,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
+        //ImgLoad();
+    }
+
+    private void ImgLoad() {
+
+        String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/com.example.javaappproject";
+        String checkPath = path+"/files";
+        String addImg = checkPath+"/Pictures";
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+
+        for (int i=0; i< files.length; i++) {
+            if (checkPath.equals(String.valueOf(files[i]))) {
+                File newDirectory = new File(addImg);
+                File[] newFiles = newDirectory.listFiles();
+                for (int j=0; j<newFiles.length; j++) {
+                    addMarker(newFiles[i]);
+                    Log.d("filesNameList", "yes " + newFiles[i]);
+                }
+            }
+            else{
+                Log.d("filesNameList", "no ");
+            }
+
+            //addMarker(files[i]);
+        }
+        //Log.d("filesNameList", "ImgPath: "+path);
+
+        //File file = new File(CurrentPhotoPath);
     }
 
     /**
@@ -317,6 +380,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         //endregion
+    }
+
+    // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
+    private void addMarkerMethod(MarkerItem item) {
+        mMap.addMarker(new MarkerOptions()
+                .position(item.getLatLng())
+                .icon(item.getImageBitmapDescritor())
+                .title(item.getDateSting())
+        );
     }
 
     private void dispatchTakePictureIntent() {
