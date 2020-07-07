@@ -45,9 +45,6 @@ public class MarkerItem {
             e.printStackTrace();
         }
 
-<<<<<<< Updated upstream
-        // 시간, 제목(default: 시간) 설정
-=======
         // 제목 (default: 파일 이름)
         this.title = this.file.getName().substring(0, file.getName().length()-4);
 
@@ -76,12 +73,8 @@ public class MarkerItem {
 
 
         // 시간 설정
->>>>>>> Stashed changes
         try {
-
-            this.date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(file.getName().substring(5, file.getName().length()-4));
-
-            this.title = getDateSting();
+            this.date = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss").parse(exif.getAttribute(ExifInterface.TAG_DATETIME));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -182,8 +175,6 @@ public class MarkerItem {
 
     public void setTitle(String title) {
         this.title = title;
-<<<<<<< Updated upstream
-=======
 
         file.renameTo(new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('/')+1) + title+".jpg"));
 
@@ -192,7 +183,6 @@ public class MarkerItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
->>>>>>> Stashed changes
     }
 
     public String getContent() {

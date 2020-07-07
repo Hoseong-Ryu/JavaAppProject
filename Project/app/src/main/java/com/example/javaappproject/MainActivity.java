@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -119,35 +120,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
-        //ImgLoad();
-    }
-
-    private void ImgLoad() {
-
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/com.example.javaappproject";
-        String checkPath = path+"/files";
-        String addImg = checkPath+"/Pictures";
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-
-        for (int i=0; i< files.length; i++) {
-            if (checkPath.equals(String.valueOf(files[i]))) {
-                File newDirectory = new File(addImg);
-                File[] newFiles = newDirectory.listFiles();
-                for (int j=0; j<newFiles.length; j++) {
-                    addMarker(newFiles[i]);
-                    Log.d("filesNameList", "yes " + newFiles[i]);
-                }
-            }
-            else{
-                Log.d("filesNameList", "no ");
-            }
-
-            //addMarker(files[i]);
-        }
-        //Log.d("filesNameList", "ImgPath: "+path);
-
-        //File file = new File(CurrentPhotoPath);
     }
 
     /**
@@ -318,6 +290,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 title.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
+                        if(editText.getParent() != null)
+                            ((ViewGroup)editText.getParent()).removeView(editText);
+
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("제목 수정")
                                 .setMessage("현재 제목 : " + title.getText())
@@ -325,10 +300,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .setPositiveButton("완료", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-<<<<<<< Updated upstream
-                                        item.setTitle(editText.getText().toString());
-                                        title.setText(item.getTitle());
-=======
                                         if(!editText.getText().toString().replace(" ", "").equals("")) {
                                             item.setTitle(editText.getText().toString());
                                             title.setText(item.getTitle());
@@ -362,7 +333,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             content.setText(item.getContent());
                                             editText.setText("");
                                         }
->>>>>>> Stashed changes
                                     }
                                 })
                                 .setNegativeButton("취소", null)
@@ -380,15 +350,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         //endregion
-    }
-
-    // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
-    private void addMarkerMethod(MarkerItem item) {
-        mMap.addMarker(new MarkerOptions()
-                .position(item.getLatLng())
-                .icon(item.getImageBitmapDescritor())
-                .title(item.getDateSting())
-        );
     }
 
     private void dispatchTakePictureIntent() {
