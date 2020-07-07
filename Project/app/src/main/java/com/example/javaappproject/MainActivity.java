@@ -85,24 +85,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnmenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupMenu popup= new PopupMenu(getApplicationContext(), v);
+                PopupMenu popup = new PopupMenu(getApplicationContext(), v);
                 Menu menu = popup.getMenu();
-                String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/Android/data/com.example.javaappproject";
-                String checkPath = path+"/files";
-                String addImg = checkPath+"/Pictures";
+                String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.example.javaappproject";
+                String checkPath = path + "/files";
+                String addImg = checkPath + "/Pictures";
                 File directory = new File(path);
                 File[] files = directory.listFiles();
 
-                for (int i=0; i< files.length; i++) {
+                for (int i = 0; i < files.length; i++) {
                     if (checkPath.equals(String.valueOf(files[i]))) {
                         File newDirectory = new File(addImg);
                         File[] newFiles = newDirectory.listFiles();
-                        for (int j=0; j<newFiles.length; j++) {
-                            menu.add(0,j,0,newFiles[j].getName());
+                        for (int j = 0; j < newFiles.length; j++) {
+                            menu.add(0, j, 0, newFiles[j].getName());
                             Log.d("filesNameLis", "yes " + i);
                         }
-                    }
-                    else{
+                    } else {
                         Log.d("filesNameList", "no ");
                     }
                 }
@@ -113,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //endreion
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "권한 설정 완료");
             } else {
                 Log.d(TAG, "권한 설정 요청");
@@ -374,6 +373,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
+
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
