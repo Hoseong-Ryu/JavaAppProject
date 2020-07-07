@@ -10,6 +10,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,7 +44,38 @@ public class MarkerItem {
             e.printStackTrace();
         }
 
+<<<<<<< Updated upstream
         // 시간, 제목(default: 시간) 설정
+=======
+        // 제목 (default: 파일 이름)
+        this.title = this.file.getName().substring(0, file.getName().length()-4);
+
+        // 내용
+        /*
+        if(!(exif.getAttribute(ExifInterface.TAG_USER_COMMENT) == null || exif.getAttribute(ExifInterface.TAG_USER_COMMENT).equals("?"))) {
+            try {
+                this.content = new String(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).getBytes("us-ascii"), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        } else {
+            content = "내용을 입력해 주세요";
+        }
+         */
+        //if(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).replace(" ", "").replace("?", "").equals(""))
+        if(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).equals(""))
+            setContent("내용을 입력해 주세요");
+        else {
+            try {
+                new String(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).getBytes("utf-8"), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        // 시간 설정
+>>>>>>> Stashed changes
         try {
 
             this.date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(file.getName().substring(5, file.getName().length()-4));
@@ -147,6 +181,17 @@ public class MarkerItem {
 
     public void setTitle(String title) {
         this.title = title;
+<<<<<<< Updated upstream
+=======
+
+        file.renameTo(new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('/')+1) + title+".jpg"));
+
+        try {
+            exif.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+>>>>>>> Stashed changes
     }
 
     public String getContent() {
@@ -155,5 +200,18 @@ public class MarkerItem {
 
     public void setContent(String content) {
         this.content = content;
+
+        try {
+            //exif.setAttribute(ExifInterface.TAG_USER_COMMENT, new String(content.getBytes("utf-8"), "us-ascii"));
+
+            exif.setAttribute(ExifInterface.TAG_USER_COMMENT, new String(content.getBytes("utf-8"), "utf-8"));
+            //exif.setAttribute(ExifInterface.TAG_USER_COMMENT, content);
+            exif.saveAttributes();
+        } catch (UnsupportedEncodingException e) {
+            Log.d("D/MainActivityLog", "변환 오류");
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

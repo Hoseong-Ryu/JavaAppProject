@@ -262,8 +262,44 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .setPositiveButton("완료", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+<<<<<<< Updated upstream
                                         item.setTitle(editText.getText().toString());
                                         title.setText(item.getTitle());
+=======
+                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                            item.setTitle(editText.getText().toString());
+                                            title.setText(item.getTitle());
+                                            editText.setText("");
+                                        }
+                                    }
+                                })
+                                .setNegativeButton("취소", null)
+                                .show();
+
+                        return true;
+                    }
+                });
+
+                // 메뉴 수정
+                content.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if(editText.getParent() != null)
+                            ((ViewGroup)editText.getParent()).removeView(editText);
+
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("내용 수정")
+                                .setMessage("현재 내용 : " + content.getText())
+                                .setView(editText)
+                                .setPositiveButton("완료", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                            item.setContent(editText.getText().toString());
+                                            content.setText(item.getContent());
+                                            editText.setText("");
+                                        }
+>>>>>>> Stashed changes
                                     }
                                 })
                                 .setNegativeButton("취소", null)
