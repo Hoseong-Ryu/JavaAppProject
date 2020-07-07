@@ -15,11 +15,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static android.graphics.Bitmap.createScaledBitmap;
-
 public class MarkerItem {
     private File file;
+    private ExifInterface exif;
 
+    //private int degree;
     private double latitude;    // 위도
     private double longitude;   // 경도
     private Date date;
@@ -32,7 +32,7 @@ public class MarkerItem {
 
         // 위도 경도 설정
         try {
-            ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+            exif = new ExifInterface(file.getAbsolutePath());
             float[] p = new float[2];
             exif.getLatLong(p);
 
@@ -43,15 +43,17 @@ public class MarkerItem {
             e.printStackTrace();
         }
 
-        // 시간, 제목(default: 시간) 설정
+        // 제목 (default: 파일 이름)
+        this.title = this.file.getName().substring(0, file.getName().length()-4);
+
+        // 시간 설정
         try {
-
-            this.date = new SimpleDateFormat("yyyyMMdd_HHmmss").parse(file.getName().substring(5, file.getName().length()-4));
-
-            this.title = getDateSting();
+            this.date = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss").parse(exif.getAttribute(ExifInterface.TAG_DATETIME));
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        //degree = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
     }
 
     public File getFile() {
@@ -76,7 +78,61 @@ public class MarkerItem {
         return longitude;
     }
 
+    private String ConvertTagGPSFormat(double coordinate) {
+
+        if (coordinate < -180.0 || coordinate > 180.0 || Double.isNaN(coordinate)) {
+            throw new IllegalArgumentException("coordinate=" + coordinate);
+        }
+
+        if (coordinate < 0)
+            coordinate *=-1;
+
+        StringBuilder sb = new StringBuilder();
+
+
+        if (coordinate < 0) {
+            sb.append('-');
+            coordinate = -coordinate;
+        }
+
+        int degrees = (int) Math.floor(coordinate);
+        sb.append(degrees);
+        sb.append("/1,");
+        coordinate -= degrees;
+        coordinate *= 60.0;
+        int minutes = (int) Math.floor(coordinate);
+        sb.append(minutes);
+        sb.append("/1,");
+        coordinate -= minutes;
+        coordinate *= 60.0;
+        sb.append(coordinate);
+        sb.append("/1000");
+
+
+        return sb.toString();
+    }
+
+
     public void setLocation(double latitude, double longitude) {
+        // 위도 설정
+        exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, ConvertTagGPSFormat(latitude));
+        if(latitude>=0)
+            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
+        else
+            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "S");
+        // 경도 설정
+        exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, ConvertTagGPSFormat(longitude));
+        if(longitude>=0)
+            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "E");
+        else
+            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "W");
+        // 저장
+        try {
+            exif.saveAttributes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -95,6 +151,7 @@ public class MarkerItem {
 
     public void setTitle(String title) {
         this.title = title;
+        file.renameTo(new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('/')+1) + title+".jpg"));
     }
 
     public String getContent() {

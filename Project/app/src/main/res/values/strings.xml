@@ -2,4 +2,5 @@
     <string name="app_name">JavaAppProject</string>
     <string name="title_activity_maps">Map</string>
     <dimen name="textSize">20sp</dimen>
+    <dimen name="marginSize">5dp</dimen>
 </resources>

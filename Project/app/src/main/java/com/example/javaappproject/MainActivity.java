@@ -9,7 +9,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.ParseException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,6 +36,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
 
-    final String TAG = getClass().getSimpleName();
+    final String TAG = getClass().getSimpleName()+"Log";    // D/MainActivityLog
     Button btnCamera;
     Button btnmenu;
     final static int TAKE_PICTURE = 1;
@@ -118,6 +120,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
         }
+<<<<<<< HEAD
+=======
         //ImgLoad();
     }
 
@@ -147,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Log.d("filesNameList", "ImgPath: "+path);
 
         //File file = new File(CurrentPhotoPath);
+>>>>>>> master
     }
 
     /**
@@ -159,6 +164,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * installed Google Play services and returned to the app.
      */
 
+    private void ImgLoad() {
+        String path = MainActivity.this.getFilesDir()+"/Pictures";
+        File[] files = new File(path).listFiles();
+
+        if(files == null) {
+            Log.d(TAG, "파일이 없습니다.");
+            return;
+        }
+
+        Log.d(TAG, String.valueOf(files.length));
+
+        for (int i=0; i< files.length; i++) {
+            addMarker(files[i]);
+        }
+
+
+        Log.d(TAG, "ImgPath: "+path);
+
+        //File file = new File(CurrentPhotoPath);
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -167,6 +193,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        ImgLoad();
+        isStart = false;
     }
 
     @Override
@@ -193,38 +222,63 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    boolean isStart = true; // 처음 시작할때는 위치 설정 안되게 하는 flag(임시)
 
     private void addMarker(File file) {
         final MarkerItem item = new MarkerItem(file);
         markerItems.add(item);
 
-        //region    위치 강제 설정 기능 (완성후 activity_setlocation.xml과 같이 삭제)
-        final View dialogView = View.inflate(MainActivity.this, R.layout.activity_set_location, null);
-        new AlertDialog.Builder(MainActivity.this)
-                .setTitle("위치 설정")
-                .setView(dialogView)
-                .setCancelable(false)
-                .setPositiveButton("완료", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            item.setLocation(Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLatitude)).getText().toString()), Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLongitude)).getText().toString()));
-                        } catch (ParseException e) {  }
 
-
-                        addMarkerMethod(item);
-                    }
-                })
-                .setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        addMarkerMethod(item);
-                    }
-                })
-                .show();
+        //region    위치 강제 설정 기능 (완성후 activity_setlocation.xml, isStart 변수와 같이 삭제)
+        if (!isStart) {
+            final View dialogView = View.inflate(MainActivity.this, R.layout.activity_set_location, null);
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("위치 설정")
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .setPositiveButton("완료", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                item.setLocation(Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLatitude)).getText().toString()), Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLongitude)).getText().toString()));
+                            } catch (NumberFormatException e) {  }
+                            addMarkerMethod(item);
+                        }
+                    })
+                    .setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            addMarkerMethod(item);
+                        }
+                    })
+                    .show();
+        } else {
+            addMarkerMethod(item);
+        }
         //endregion
 
         //addMarkerMethod(item);
+<<<<<<< HEAD
+    }
+
+    // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
+    private void addMarkerMethod(final MarkerItem item) {
+        Log.d(TAG, item.getLatLng().toString());
+
+        try {
+            mMap.addMarker(new MarkerOptions()
+                    .position(item.getLatLng())
+                    .icon(item.getImageBitmapDescritor())
+                    .title(item.getDateSting())
+            );
+        } catch (Exception e) {
+            markerItems.remove(item);
+            Log.d(TAG, item.getFile().toString()+"를 로드에 실패해 삭제 하였습니다.");
+            item.getFile().delete();
+        }
+
+=======
+>>>>>>> master
 
         //region 마커 클릭
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -249,14 +303,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         break;
                     }
                 }
-                if(i<markerItems.size()) {
-                    final MarkerItem item = markerItems.get(i);
-                }
-                else {
+                if(i>=markerItems.size()) {
                     Log.e(TAG, "marker를 찾지 못함");
-                    return true;
+                    return false;
                 }
+                final MarkerItem item = markerItems.get(i);
 
+                final EditText editText = new EditText(MainActivity.this);
 
                 // 레이아웃 세팅
                 picture.setImageURI(Uri.fromFile(item.getFile()));
@@ -269,10 +322,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     content.setText(item.getContent());
                 }
 
-                final EditText editText = new EditText(MainActivity.this);
+                //제목 수정
                 title.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
+                        if(editText.getParent() != null)
+                            ((ViewGroup)editText.getParent()).removeView(editText);
+
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("제목 수정")
                                 .setMessage("현재 제목 : " + title.getText())
@@ -280,8 +336,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .setPositiveButton("완료", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        item.setTitle(editText.getText().toString());
-                                        title.setText(item.getTitle());
+                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                            item.setTitle(editText.getText().toString());
+                                            title.setText(item.getTitle());
+                                        }
+                                    }
+                                })
+                                .setNegativeButton("취소", null)
+                                .show();
+
+                        return true;
+                    }
+                });
+
+                // 메뉴 수정
+                content.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        if(editText.getParent() != null)
+                            ((ViewGroup)editText.getParent()).removeView(editText);
+
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("내용 수정")
+                                .setMessage("현재 내용 : " + content.getText())
+                                .setView(editText)
+                                .setPositiveButton("완료", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                            item.setContent(editText.getText().toString());
+                                            content.setText(item.getContent());
+                                        }
                                     }
                                 })
                                 .setNegativeButton("취소", null)
@@ -299,6 +384,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         //endregion
+<<<<<<< HEAD
+=======
     }
 
     // 완성할때 이 함수의 코드를 위의 주석에 대입한다.
@@ -308,6 +395,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .icon(item.getImageBitmapDescritor())
                 .title(item.getDateSting())
         );
+>>>>>>> master
     }
 
     private void dispatchTakePictureIntent() {
@@ -319,6 +407,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
+                ex.printStackTrace();
                 // Error occurred while creating the File
             }
             // Continue only if the File was successfully created
@@ -335,7 +424,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        // input : 파일 이름  output : 파일의 경로, 새 파일
+        File storageDir = null;
+        try {
+            storageDir = new File(MainActivity.this.getFilesDir(), "Pictures");
+
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, storageDir.getAbsolutePath());
+        Log.d(TAG, storageDir.isDirectory()+"");
+
+        if(!storageDir.exists()) {
+            storageDir.mkdirs();
+        }
+
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -343,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         );
         // Save a file: path for use with ACTION_VIEW intents
         CurrentPhotoPath = image.getAbsolutePath();
+        Log.d(TAG, CurrentPhotoPath);
         return image;
     }
 }
