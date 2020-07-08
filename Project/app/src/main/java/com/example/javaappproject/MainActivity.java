@@ -87,23 +87,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 PopupMenu popup = new PopupMenu(getApplicationContext(), v);
                 Menu menu = popup.getMenu();
-                String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/com.example.javaappproject";
-                String checkPath = path + "/files";
-                String addImg = checkPath + "/Pictures";
-                File directory = new File(path);
-                File[] files = directory.listFiles();
+                String path = MainActivity.this.getFilesDir()+"/Pictures";
+                File[] files = new File(path).listFiles();
 
-                for (int i = 0; i < files.length; i++) {
-                    if (checkPath.equals(String.valueOf(files[i]))) {
-                        File newDirectory = new File(addImg);
-                        File[] newFiles = newDirectory.listFiles();
-                        for (int j = 0; j < newFiles.length; j++) {
-                            menu.add(0, j, 0, newFiles[j].getName());
-                            Log.d("filesNameLis", "yes " + i);
-                        }
-                    } else {
-                        Log.d("filesNameList", "no ");
-                    }
+                if(files == null) {
+                    Log.d(TAG, "파일이 없습니다.");
+                    return;
+                }
+
+                Log.d(TAG, String.valueOf(files.length));
+
+                for (int i=0; i< files.length; i++) {
+                    menu.add(files[i].getName());
                 }
 
                 popup.show();//Popup Menu 보이기
