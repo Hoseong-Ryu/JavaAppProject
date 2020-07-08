@@ -109,8 +109,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 popup.show();//Popup Menu 보이기
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        //activity_picture_detail.xml불러오기
+                    public boolean onMenuItemClick(MenuItem item) {
+                        ///activity_picture_detail.xml불러오기
+                        return false;
                     }
                 });
             }
