@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.Date;
 public class MarkerItem {
     private File file;
     private ExifInterface exif;
+    private Marker marker;
 
     private double latitude;    // 위도
     private double longitude;   // 경도
@@ -49,7 +51,6 @@ public class MarkerItem {
         this.title = this.file.getName().substring(0, file.getName().length()-4);
 
         // 내용
-        /*
         if(!(exif.getAttribute(ExifInterface.TAG_USER_COMMENT) == null || exif.getAttribute(ExifInterface.TAG_USER_COMMENT).equals("?"))) {
             try {
                 this.content = new String(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).getBytes("us-ascii"), "utf-8");
@@ -59,17 +60,7 @@ public class MarkerItem {
         } else {
             content = "내용을 입력해 주세요";
         }
-         */
         //if(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).replace(" ", "").replace("?", "").equals(""))
-        if(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).equals(""))
-            setContent("내용을 입력해 주세요");
-        else {
-            try {
-                new String(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).getBytes("utf-8"), "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
 
 
         // 시간 설정
@@ -194,9 +185,7 @@ public class MarkerItem {
         this.content = content;
 
         try {
-            //exif.setAttribute(ExifInterface.TAG_USER_COMMENT, new String(content.getBytes("utf-8"), "us-ascii"));
-
-            exif.setAttribute(ExifInterface.TAG_USER_COMMENT, new String(content.getBytes("utf-8"), "utf-8"));
+            exif.setAttribute(ExifInterface.TAG_USER_COMMENT, new String(content.getBytes("utf-8"), "us-ascii"));
             //exif.setAttribute(ExifInterface.TAG_USER_COMMENT, content);
             exif.saveAttributes();
         } catch (UnsupportedEncodingException e) {
@@ -205,5 +194,13 @@ public class MarkerItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setMarker(Marker marker) {
+        this.marker = marker;
+    }
+
+    public Marker getMarker() {
+        return marker;
     }
 }

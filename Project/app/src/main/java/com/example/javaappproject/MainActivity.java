@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public boolean onMenuItemClick(final MenuItem item) {
                         for (int i = 0; i<markerItems.size(); i++) {
                             if((markerItems.get(i).getTitle()).equals(item.getTitle())) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerItems.get(i).getLatLng(), 12));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerItems.get(i).getLatLng(), 12));
 
                                 break;
                             }
@@ -238,15 +238,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, item.getLatLng().toString());
 
         try {
-            mMap.addMarker(new MarkerOptions()
+            item.setMarker(
+                mMap.addMarker(new MarkerOptions()
                     .position(item.getLatLng())
                     .icon(item.getImageBitmapDescritor())
                     .title(item.getDateSting())
+                )
             );
         } catch (Exception e) {
-            markerItems.remove(item);
+            deleteMarker(item);
             Log.d(TAG, item.getFile().toString() + "를 로드에 실패해 삭제 하였습니다.");
-            item.getFile().delete();
         }
 
 
@@ -258,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 View detailView = View.inflate(MainActivity.this, R.layout.activity_picture_detail, null);
                 ImageView picture;
                 final TextView title, date, location, content;
+                Button btnDelete;
                 int i;
 
                 // 레이아웃 연결
@@ -266,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 date = detailView.findViewById(R.id.textViewDate);
                 location = detailView.findViewById(R.id.textViewLocation);
                 content = detailView.findViewById(R.id.textViewContent);
+                btnDelete = detailView.findViewById(R.id.btnDelete);
 
                 // 선택한 marker의 MarkerItem 찾기
                 for (i = 0; i < markerItems.size(); i++) {
@@ -347,6 +350,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 });
 
+                // 삭제
+                btnDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("삭제")
+                                .setMessage("정말로 삭제하시겠습니까?")
+                                .setCancelable(false)
+                                .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        deleteMarker(item);
+                                        item.getMarker().remove();
+                                        Toast.makeText(MainActivity.this, "삭제되었습니다", Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .setNegativeButton("아니요", null)
+                                .show();
+                    }
+                });
+
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("상세 정보")
                         .setView(detailView)
@@ -355,6 +379,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         //endregion
+    }
+
+    private void deleteMarker(MarkerItem item) {
+        markerItems.remove(item);
+        item.getFile().delete();
     }
 
     private void dispatchTakePictureIntent() {
