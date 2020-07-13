@@ -91,89 +91,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 PopupMenu popup = new PopupMenu(getApplicationContext(), v);
                 Menu menu = popup.getMenu();
-                final String path = MainActivity.this.getFilesDir() + "/Pictures";
-                final File[] files = new File(path).listFiles();
 
-                if (files == null) {
-                    Log.d(TAG, "파일이 없습니다.");
-                    return;
-                }
+                Log.d(TAG, String.valueOf(markerItems.size()));
 
-                Log.d(TAG, String.valueOf(files.length));
-
-                for (int i = 0; i < files.length; i++) {
-                    menu.add(files[i].getName());
+                for (int i = 0; i < markerItems.size(); i++) {
+                    menu.add(markerItems.get(i).getTitle());
                 }
 
                 popup.show();//Popup Menu 보이기
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(final MenuItem item) {
-                        View detailView = View.inflate(MainActivity.this, R.layout.activity_picture_detail, null);
-                        ImageView picture;
-                        final TextView title, date, textView3,textViewContent,textView4,textViewLocation;
-                        int i;
+                        for (int i = 0; i<markerItems.size(); i++) {
+                            if((markerItems.get(i).getTitle()).equals(item.getTitle())) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerItems.get(i).getLatLng(), 12));
 
-                        // 레이아웃 연결
-                        picture = detailView.findViewById(R.id.imageViewPicture);
-                        title = detailView.findViewById(R.id.textViewTitle);
-                        date = detailView.findViewById(R.id.textViewDate);
-                        textView4= detailView.findViewById(R.id.textView4);
-                        textViewContent = detailView.findViewById(R.id.textViewContent);
-                        textView3 = detailView.findViewById(R.id.textView3);
-                        textViewLocation = detailView.findViewById(R.id.textViewLocation);
-
-                        for (i = 0; i < files.length; i++) {
-                            if (files[i].getName().equals(item.getTitle()))
-                            break;
-                        }
-
-                        String popupPath = path + "/" + item.getTitle();
-                        Bitmap bm = BitmapFactory.decodeFile(popupPath);
-                        picture.setImageBitmap(bm);
-                        title.setText(item.getTitle());
-
-                        Date time = new Date(files[i].lastModified());
-                        String settime = time.toString().substring(0,10)+time.toString().substring(29,34);
-                        date.setText(settime);
-
-                        final EditText editText = new EditText(MainActivity.this);
-                        title.setOnLongClickListener(new View.OnLongClickListener() {
-                            @Override
-                            public boolean onLongClick(View v) {
-                                if (editText.getParent() != null)
-                                    ((ViewGroup) editText.getParent()).removeView(editText);
-
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setTitle("제목 수정")
-                                        .setMessage("현재 제목 : " + title.getText())
-                                        .setView(editText)
-                                        .setPositiveButton("완료", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                if (!editText.getText().toString().replace(" ", "").equals("")) {
-                                                    item.setTitle(editText.getText().toString());
-                                                    title.setText(item.getTitle());
-                                                    editText.setText("");
-                                                }
-                                            }
-                                        })
-                                        .setNegativeButton("취소", null)
-                                        .show();
-
-                                return true;
+                                break;
                             }
-                        });
-                        textView4.setVisibility(View.INVISIBLE);
-                        textViewContent.setVisibility(View.INVISIBLE);
-                        textView3.setVisibility(View.INVISIBLE);
-                        textViewLocation.setVisibility(View.INVISIBLE);
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("상세 정보")
-                                .setView(detailView)
-                                .show();
-
-
+                        }
                         return false;
                     }
                 });
