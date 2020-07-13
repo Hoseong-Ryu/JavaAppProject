@@ -60,7 +60,6 @@ public class MarkerItem {
         } else {
             content = "내용을 입력해 주세요";
         }
-        //if(exif.getAttribute(ExifInterface.TAG_USER_COMMENT).replace(" ", "").replace("?", "").equals(""))
 
 
         // 시간 설정
@@ -135,12 +134,14 @@ public class MarkerItem {
             exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
         else
             exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "S");
+
         // 경도 설정
         exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, ConvertTagGPSFormat(longitude));
         if(longitude>=0)
             exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "E");
         else
             exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "W");
+
         // 저장
         try {
             exif.saveAttributes();
@@ -186,7 +187,6 @@ public class MarkerItem {
 
         try {
             exif.setAttribute(ExifInterface.TAG_USER_COMMENT, new String(content.getBytes("utf-8"), "us-ascii"));
-            //exif.setAttribute(ExifInterface.TAG_USER_COMMENT, content);
             exif.saveAttributes();
         } catch (UnsupportedEncodingException e) {
             Log.d("D/MainActivityLog", "변환 오류");
