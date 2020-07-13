@@ -9,6 +9,9 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
 
-    final String TAG = getClass().getSimpleName()+"Log";    // D/MainActivityLog
+    final String TAG = getClass().getSimpleName() + "Log";    // D/MainActivityLog
     Button btnCamera;
     Button btnmenu;
     final static int TAKE_PICTURE = 1;
@@ -87,25 +91,89 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 PopupMenu popup = new PopupMenu(getApplicationContext(), v);
                 Menu menu = popup.getMenu();
-                String path = MainActivity.this.getFilesDir()+"/Pictures";
-                File[] files = new File(path).listFiles();
+                final String path = MainActivity.this.getFilesDir() + "/Pictures";
+                final File[] files = new File(path).listFiles();
 
-                if(files == null) {
+                if (files == null) {
                     Log.d(TAG, "파일이 없습니다.");
                     return;
                 }
 
                 Log.d(TAG, String.valueOf(files.length));
 
-                for (int i=0; i< files.length; i++) {
+                for (int i = 0; i < files.length; i++) {
                     menu.add(files[i].getName());
                 }
 
                 popup.show();//Popup Menu 보이기
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        ///activity_picture_detail.xml불러오기
+                    public boolean onMenuItemClick(final MenuItem item) {
+                        View detailView = View.inflate(MainActivity.this, R.layout.activity_picture_detail, null);
+                        ImageView picture;
+                        final TextView title, date, textView3,textViewContent,textView4,textViewLocation;
+                        int i;
+
+                        // 레이아웃 연결
+                        picture = detailView.findViewById(R.id.imageViewPicture);
+                        title = detailView.findViewById(R.id.textViewTitle);
+                        date = detailView.findViewById(R.id.textViewDate);
+                        textView4= detailView.findViewById(R.id.textView4);
+                        textViewContent = detailView.findViewById(R.id.textViewContent);
+                        textView3 = detailView.findViewById(R.id.textView3);
+                        textViewLocation = detailView.findViewById(R.id.textViewLocation);
+
+                        for (i = 0; i < files.length; i++) {
+                            if (files[i].getName().equals(item.getTitle()))
+                            break;
+                        }
+
+                        String popupPath = path + "/" + item.getTitle();
+                        Bitmap bm = BitmapFactory.decodeFile(popupPath);
+                        picture.setImageBitmap(bm);
+                        title.setText(item.getTitle());
+
+                        Date time = new Date(files[i].lastModified());
+                        String settime = time.toString().substring(0,10)+time.toString().substring(29,34);
+                        date.setText(settime);
+
+                        final EditText editText = new EditText(MainActivity.this);
+                        title.setOnLongClickListener(new View.OnLongClickListener() {
+                            @Override
+                            public boolean onLongClick(View v) {
+                                if (editText.getParent() != null)
+                                    ((ViewGroup) editText.getParent()).removeView(editText);
+
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setTitle("제목 수정")
+                                        .setMessage("현재 제목 : " + title.getText())
+                                        .setView(editText)
+                                        .setPositiveButton("완료", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                if (!editText.getText().toString().replace(" ", "").equals("")) {
+                                                    item.setTitle(editText.getText().toString());
+                                                    title.setText(item.getTitle());
+                                                    editText.setText("");
+                                                }
+                                            }
+                                        })
+                                        .setNegativeButton("취소", null)
+                                        .show();
+
+                                return true;
+                            }
+                        });
+                        textView4.setVisibility(View.INVISIBLE);
+                        textViewContent.setVisibility(View.INVISIBLE);
+                        textView3.setVisibility(View.INVISIBLE);
+                        textViewLocation.setVisibility(View.INVISIBLE);
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("상세 정보")
+                                .setView(detailView)
+                                .show();
+
+
                         return false;
                     }
                 });
@@ -134,22 +202,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
 
     private void ImgLoad() {
-        String path = MainActivity.this.getFilesDir()+"/Pictures";
+        String path = MainActivity.this.getFilesDir() + "/Pictures";
         File[] files = new File(path).listFiles();
 
-        if(files == null) {
+        if (files == null) {
             Log.d(TAG, "파일이 없습니다.");
             return;
         }
 
         Log.d(TAG, String.valueOf(files.length));
 
-        for (int i=0; i< files.length; i++) {
+        for (int i = 0; i < files.length; i++) {
             addMarker(files[i]);
         }
 
 
-        Log.d(TAG, "ImgPath: "+path);
+        Log.d(TAG, "ImgPath: " + path);
 
         //File file = new File(CurrentPhotoPath);
     }
@@ -209,8 +277,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             try {
-                                item.setLocation(Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLatitude)).getText().toString()), Double.parseDouble(((EditText)dialogView.findViewById(R.id.editTextLongitude)).getText().toString()));
-                            } catch (NumberFormatException e) {  }
+                                item.setLocation(Double.parseDouble(((EditText) dialogView.findViewById(R.id.editTextLatitude)).getText().toString()), Double.parseDouble(((EditText) dialogView.findViewById(R.id.editTextLongitude)).getText().toString()));
+                            } catch (NumberFormatException e) {
+                            }
                             addMarkerMethod(item);
                         }
                     })
@@ -241,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             );
         } catch (Exception e) {
             markerItems.remove(item);
-            Log.d(TAG, item.getFile().toString()+"를 로드에 실패해 삭제 하였습니다.");
+            Log.d(TAG, item.getFile().toString() + "를 로드에 실패해 삭제 하였습니다.");
             item.getFile().delete();
         }
 
@@ -264,12 +333,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 content = detailView.findViewById(R.id.textViewContent);
 
                 // 선택한 marker의 MarkerItem 찾기
-                for (i = 0; i<markerItems.size(); i++) {
-                    if(marker.getPosition().equals(markerItems.get(i).getLatLng())) {
+                for (i = 0; i < markerItems.size(); i++) {
+                    if (marker.getPosition().equals(markerItems.get(i).getLatLng())) {
                         break;
                     }
                 }
-                if(i>=markerItems.size()) {
+                if (i >= markerItems.size()) {
                     Log.e(TAG, "marker를 찾지 못함");
                     return false;
                 }
@@ -280,8 +349,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 picture.setImageURI(Uri.fromFile(item.getFile()));
                 title.setText(item.getTitle());
                 date.setText(item.getDateSting());
-                location.setText(item.getLatitude()+", "+item.getLongitude());
-                if(item.getContent().equals("")) {
+                location.setText(item.getLatitude() + ", " + item.getLongitude());
+                if (item.getContent().equals("")) {
                     content.setText("내용을 입력해 주세요");
                 } else {
                     content.setText(item.getContent());
@@ -291,8 +360,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 title.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        if(editText.getParent() != null)
-                            ((ViewGroup)editText.getParent()).removeView(editText);
+                        if (editText.getParent() != null)
+                            ((ViewGroup) editText.getParent()).removeView(editText);
 
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("제목 수정")
@@ -301,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .setPositiveButton("완료", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                        if (!editText.getText().toString().replace(" ", "").equals("")) {
                                             item.setTitle(editText.getText().toString());
                                             title.setText(item.getTitle());
                                             editText.setText("");
@@ -319,8 +388,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 content.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        if(editText.getParent() != null)
-                            ((ViewGroup)editText.getParent()).removeView(editText);
+                        if (editText.getParent() != null)
+                            ((ViewGroup) editText.getParent()).removeView(editText);
 
                         new AlertDialog.Builder(MainActivity.this)
                                 .setTitle("내용 수정")
@@ -329,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .setPositiveButton("완료", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        if(!editText.getText().toString().replace(" ", "").equals("")) {
+                                        if (!editText.getText().toString().replace(" ", "").equals("")) {
                                             item.setContent(editText.getText().toString());
                                             content.setText(item.getContent());
                                             editText.setText("");
@@ -389,9 +458,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
         Log.d(TAG, storageDir.getAbsolutePath());
-        Log.d(TAG, storageDir.isDirectory()+"");
+        Log.d(TAG, storageDir.isDirectory() + "");
 
-        if(!storageDir.exists()) {
+        if (!storageDir.exists()) {
             storageDir.mkdirs();
         }
 
