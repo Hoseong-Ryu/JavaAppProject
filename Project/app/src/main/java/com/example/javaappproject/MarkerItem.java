@@ -176,7 +176,8 @@ public class MarkerItem {
     public void setTitle(String title) {
         this.title = title;
 
-        file.renameTo(new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('/')+1) + title+".jpg"));
+        this.file.renameTo(new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('/')+1) + title+".jpg"));
+        this.file = new File(file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf('/')+1) + title+".jpg");
 
         try {
             exif.saveAttributes();
